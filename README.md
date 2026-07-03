@@ -40,6 +40,28 @@ fecha sempre com uma pergunta.
 - Domínios de referência: `architecture.md`, `security.md`,
   `cloud-devops.md`, `ai-integration.md`, `observability.md`
 
+### `system_design_generator`
+Gera Technical Architecture Documents (TAD) completos a partir de um PRD, com
+design modular para startups. Usa uma arquitetura de subagentes em paralelo
+(`prd-reader`, `tech-researcher` x5, `tad-writer`) cobrindo stack, infra,
+segurança, riscos e alinhamento com o PRD.
+
+- Versão atual: `v1`
+- Origem: renomeada a partir da skill `tad-generator` do repositório
+  [luongnv89/skills](https://github.com/luongnv89/skills) (MIT, autor Luong
+  NGUYEN), instalada via `npx skills`.
+- Subagentes: `agents/prd-reader.md`, `agents/tech-researcher.md`,
+  `agents/tad-writer.md`
+- Referências: `references/tech-stack.md`, `references/tad-template.md`
+
+### `analisador_vagas_tech`
+Analisa criticamente vagas de tecnologia para um Backend Engineer Python
+sênior (Django, FastAPI, APIs, cloud, microserviços, event-driven, async) em
+transição gradual para AI Backend Engineering, e emite um veredito
+estratégico sobre aplicar ou não.
+
+- Versão atual: `v1`
+
 ## Instalação
 
 Para instalar uma skill globalmente, copie a pasta da versão desejada para o
@@ -49,4 +71,12 @@ diretório de skills do agente, por exemplo:
 cp -r backend_mentor/v1 ~/.claude/skills/backend-mentor
 cp -r backend_mentor/v1 ~/.opencode/skills/backend-mentor
 cp -r backend_mentor/v1 ~/.codex/skills/backend-mentor
+```
+
+Ou, para skills instaladas via [`npx skills`](https://skills.sh) (formato
+universal), copie para `~/.agents/skills/<nome-da-skill>` — o próprio agente
+(Claude Code, Codex, OpenCode) descobre a partir dali:
+
+```bash
+cp -r system_design_generator/v1 ~/.agents/skills/system-design-generator
 ```
