@@ -86,6 +86,8 @@ export const BlueprintSignal: React.FC<BlueprintSignalProps> = (props) => {
               fontWeight: 750,
               letterSpacing: -4,
               maxWidth: 900,
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
             }}
           >
             {data.headline}
@@ -112,6 +114,9 @@ export const BlueprintSignal: React.FC<BlueprintSignalProps> = (props) => {
                     background: COLORS.navy,
                     borderRadius: 12,
                     padding: "22px 25px",
+                    maxWidth: 360,
+                    overflowWrap: "anywhere",
+                    wordBreak: "break-word",
                   }}
                 >
                   {node}
@@ -134,6 +139,8 @@ export const BlueprintSignal: React.FC<BlueprintSignalProps> = (props) => {
               fontSize: 38,
               lineHeight: 1.25,
               fontWeight: 500,
+              overflowWrap: "anywhere",
+              wordBreak: "break-word",
             }}
           >
             {data.supportingText}
@@ -149,6 +156,9 @@ export const BlueprintSignal: React.FC<BlueprintSignalProps> = (props) => {
             fontWeight: 750,
             fontSize: 28,
             letterSpacing: 2,
+            maxWidth: 920,
+            overflowWrap: "anywhere",
+            wordBreak: "break-word",
           }}
         >
           {data.footer}

@@ -34,6 +34,9 @@ def _png_dimensions(path: Path) -> tuple[int, int]:
     offset = 8
     dimensions: tuple[int, int] | None = None
     saw_iend = False
+    saw_idat = False
+    saw_plte = False
+    idat_closed = False
     chunk_index = 0
     while offset < len(content):
         if offset + 12 > len(content):
@@ -52,7 +55,24 @@ def _png_dimensions(path: Path) -> tuple[int, int]:
             if chunk_type != b"IHDR" or length != 13:
                 raise ValueError("primeiro chunk PNG deve ser IHDR")
             dimensions = struct.unpack(">II", chunk_data[:8])
+        elif chunk_type == b"IHDR":
+            raise ValueError("chunk IHDR duplicado")
+        elif chunk_type == b"PLTE":
+            if saw_plte or saw_idat:
+                raise ValueError("chunk PLTE duplicado ou fora de ordem")
+            saw_plte = True
+        elif chunk_type == b"IDAT":
+            if idat_closed:
+                raise ValueError("chunks IDAT devem ser consecutivos")
+            saw_idat = True
+        elif chunk_type != b"IEND" and chunk_type[0] & 0x20 == 0:
+            raise ValueError(f"chunk crítico PNG desconhecido: {chunk_type!r}")
+
+        if saw_idat and chunk_type not in (b"IDAT", b"IEND"):
+            idat_closed = True
         if chunk_type == b"IEND":
+            if not saw_idat:
+                raise ValueError("PNG não contém dados IDAT")
             if length != 0 or chunk_end != len(content):
                 raise ValueError("chunk IEND inválido")
             saw_iend = True

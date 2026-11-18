@@ -129,6 +129,28 @@ class ValidatePostPackageTests(unittest.TestCase):
         self.assertEqual(result["status"], "PENDENTE")
         self.assertTrue(any("capa inválida" in error for error in result["errors"]))
 
+    def test_rejects_png_without_image_data(self) -> None:
+        def chunk(kind: bytes, data: bytes) -> bytes:
+            return (
+                struct.pack(">I", len(data))
+                + kind
+                + data
+                + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+            )
+
+        invalid_png = (
+            b"\x89PNG\r\n\x1a\n"
+            + chunk(b"IHDR", struct.pack(">IIBBBBB", 1080, 1350, 8, 2, 0, 0, 0))
+            + chunk(b"IEND", b"")
+        )
+        (self.root / "output/capa.png").write_bytes(invalid_png)
+
+        with patch.object(MODULE.subprocess, "run", side_effect=self.valid_ffprobe):
+            result = MODULE.validate_package(self.root)
+
+        self.assertEqual(result["status"], "PENDENTE")
+        self.assertTrue(any("capa inválida" in error for error in result["errors"]))
+
     def test_rejects_video_outside_duration_range(self) -> None:
         def long_video(*args, **kwargs):
             payload = {
