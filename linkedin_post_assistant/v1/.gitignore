@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+assets/remotion-template/node_modules/
+assets/remotion-template/output/
+assets/remotion-template/public/post-data.json
+assets/remotion-template/.remotion/
+

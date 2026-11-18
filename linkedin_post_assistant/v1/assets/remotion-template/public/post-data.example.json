@@ -1,0 +1,9 @@
+{
+  "series": "BACKEND NOTES",
+  "issue": "01",
+  "headline": "Uma query rápida não significa uma request rápida.",
+  "supportingText": "Performance exige medir o caminho inteiro — não apenas abrir o EXPLAIN.",
+  "nodes": ["QUERY", "SERIALIZER", "PAYLOAD"],
+  "footer": "MEDIR → COMPARAR → DECIDIR",
+  "durationSeconds": 10
+}
