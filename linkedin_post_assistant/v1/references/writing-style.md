@@ -35,4 +35,3 @@ antes da aprovação final.
 Entregue o texto, uma alternativa curta apenas quando ela oferecer uma decisão real, o roteiro
 visual, as afirmações que exigem verificação e as fontes usadas. Peça aprovação explícita antes
 de criar o pacote e renderizar.
-

@@ -26,15 +26,28 @@ const requireText = (value: unknown, field: string): string => {
   return value.trim();
 };
 
+const requireBoundedText = (
+  value: unknown,
+  field: string,
+  maxLength: number,
+): string => {
+  const text = requireText(value, field);
+  if (text.length > maxLength) {
+    throw new Error(`${field} deve ter no máximo ${maxLength} caracteres`);
+  }
+  return text;
+};
+
 export const parsePostVisualData = (input: unknown): PostVisualData => {
   if (typeof input !== "object" || input === null) {
     throw new Error("post data deve ser um objeto");
   }
   const value = input as Record<string, unknown>;
-  const supportingText = requireText(value.supportingText, "supportingText");
-  if (supportingText.length > 180) {
-    throw new Error("supportingText deve ter no máximo 180 caracteres");
-  }
+  const supportingText = requireBoundedText(
+    value.supportingText,
+    "supportingText",
+    180,
+  );
   if (
     !Array.isArray(value.nodes) ||
     value.nodes.length < 2 ||
@@ -43,7 +56,7 @@ export const parsePostVisualData = (input: unknown): PostVisualData => {
     throw new Error("nodes deve conter entre 2 e 4 itens");
   }
   const nodes = value.nodes.map((node, index) =>
-    requireText(node, `nodes[${index}]`),
+    requireBoundedText(node, `nodes[${index}]`, 24),
   );
   if (
     typeof value.durationSeconds !== "number" ||
@@ -54,13 +67,12 @@ export const parsePostVisualData = (input: unknown): PostVisualData => {
   }
 
   return {
-    series: requireText(value.series, "series"),
-    issue: requireText(value.issue, "issue"),
-    headline: requireText(value.headline, "headline"),
+    series: requireBoundedText(value.series, "series", 24),
+    issue: requireBoundedText(value.issue, "issue", 8),
+    headline: requireBoundedText(value.headline, "headline", 90),
     supportingText,
     nodes,
-    footer: requireText(value.footer, "footer"),
+    footer: requireBoundedText(value.footer, "footer", 48),
     durationSeconds: value.durationSeconds,
   };
 };
-

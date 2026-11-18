@@ -5,6 +5,7 @@ import json
 import struct
 import tempfile
 import unittest
+import zlib
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,7 +18,22 @@ SPEC.loader.exec_module(MODULE)
 
 
 def write_png_header(path: Path, width: int, height: int) -> None:
-    path.write_bytes(b"\x89PNG\r\n\x1a\n" + b"\x00" * 8 + struct.pack(">II", width, height))
+    def chunk(kind: bytes, data: bytes) -> bytes:
+        return (
+            struct.pack(">I", len(data))
+            + kind
+            + data
+            + struct.pack(">I", zlib.crc32(kind + data) & 0xFFFFFFFF)
+        )
+
+    raw_scanline = b"\x00" + (b"\x00\x00\x00" * width)
+    png = (
+        b"\x89PNG\r\n\x1a\n"
+        + chunk("IHDR".encode(), struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0))
+        + chunk("IDAT".encode(), zlib.compress(raw_scanline * height))
+        + chunk("IEND".encode(), b"")
+    )
+    path.write_bytes(png)
 
 
 class ValidatePostPackageTests(unittest.TestCase):
@@ -67,6 +83,32 @@ class ValidatePostPackageTests(unittest.TestCase):
         self.assertEqual(result["status"], "PENDENTE")
         self.assertTrue(any("texto/versao-final.md" in error for error in result["errors"]))
 
+    def test_missing_traceability_is_pending(self) -> None:
+        (self.root / "rastreabilidade.yaml").unlink()
+
+        with patch.object(MODULE.subprocess, "run", side_effect=self.valid_ffprobe):
+            result = MODULE.validate_package(self.root)
+
+        self.assertEqual(result["status"], "PENDENTE")
+        self.assertTrue(any("rastreabilidade.yaml" in error for error in result["errors"]))
+
+    def test_missing_cover_is_pending(self) -> None:
+        (self.root / "output/capa.png").unlink()
+
+        with patch.object(MODULE.subprocess, "run", side_effect=self.valid_ffprobe):
+            result = MODULE.validate_package(self.root)
+
+        self.assertEqual(result["status"], "PENDENTE")
+        self.assertTrue(any("capa.png" in error for error in result["errors"]))
+
+    def test_missing_video_is_pending(self) -> None:
+        (self.root / "output/post.mp4").unlink()
+
+        result = MODULE.validate_package(self.root)
+
+        self.assertEqual(result["status"], "PENDENTE")
+        self.assertTrue(any("post.mp4" in error for error in result["errors"]))
+
     def test_rejects_wrong_cover_dimensions(self) -> None:
         write_png_header(self.root / "output/capa.png", 1200, 1200)
 
@@ -75,6 +117,17 @@ class ValidatePostPackageTests(unittest.TestCase):
 
         self.assertEqual(result["status"], "PENDENTE")
         self.assertTrue(any("capa" in error for error in result["errors"]))
+
+    def test_rejects_truncated_png(self) -> None:
+        (self.root / "output/capa.png").write_bytes(
+            b"\x89PNG\r\n\x1a\n" + b"\x00" * 16
+        )
+
+        with patch.object(MODULE.subprocess, "run", side_effect=self.valid_ffprobe):
+            result = MODULE.validate_package(self.root)
+
+        self.assertEqual(result["status"], "PENDENTE")
+        self.assertTrue(any("capa inválida" in error for error in result["errors"]))
 
     def test_rejects_video_outside_duration_range(self) -> None:
         def long_video(*args, **kwargs):
@@ -91,6 +144,22 @@ class ValidatePostPackageTests(unittest.TestCase):
 
         self.assertEqual(result["status"], "PENDENTE")
         self.assertTrue(any("duração" in error for error in result["errors"]))
+
+    def test_rejects_video_with_wrong_frame_rate(self) -> None:
+        def slow_frame_rate(*args, **kwargs):
+            payload = {
+                "streams": [
+                    {"width": 1080, "height": 1350, "r_frame_rate": "24/1"}
+                ],
+                "format": {"duration": "10.0"},
+            }
+            return type("Result", (), {"stdout": json.dumps(payload), "returncode": 0})()
+
+        with patch.object(MODULE.subprocess, "run", side_effect=slow_frame_rate):
+            result = MODULE.validate_package(self.root)
+
+        self.assertEqual(result["status"], "PENDENTE")
+        self.assertTrue(any("30 fps" in error for error in result["errors"]))
 
     def test_missing_ffprobe_is_pending(self) -> None:
         with patch.object(MODULE.subprocess, "run", side_effect=FileNotFoundError):

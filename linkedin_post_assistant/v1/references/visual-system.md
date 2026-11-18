@@ -31,4 +31,3 @@ Quando o usuário pedir movimento reduzido, use a capa estática ou uma versão 
 
 Não use logotipo ou identidade de terceiros. A referência a outros criadores se limita a
 princípios gerais de concisão, clareza e movimento explicativo.
-

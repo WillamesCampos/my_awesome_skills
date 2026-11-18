@@ -27,4 +27,3 @@ qualquer afirmação de resultado.
 
 Nunca interprete lacuna em um exercício como incapacidade profissional geral. Prefira mostrar
 evolução, raciocínio e perguntas abertas.
-

@@ -7,6 +7,8 @@ import argparse
 import json
 import struct
 import subprocess
+import zlib
+from fractions import Fraction
 from pathlib import Path
 from typing import Any
 
@@ -25,10 +27,42 @@ MAX_DURATION = 15.0
 
 
 def _png_dimensions(path: Path) -> tuple[int, int]:
-    header = path.read_bytes()[:24]
-    if len(header) < 24 or header[:8] != b"\x89PNG\r\n\x1a\n":
+    content = path.read_bytes()
+    if len(content) < 45 or content[:8] != b"\x89PNG\r\n\x1a\n":
         raise ValueError("arquivo não é um PNG válido")
-    return struct.unpack(">II", header[16:24])
+
+    offset = 8
+    dimensions: tuple[int, int] | None = None
+    saw_iend = False
+    chunk_index = 0
+    while offset < len(content):
+        if offset + 12 > len(content):
+            raise ValueError("chunk PNG truncado")
+        length = struct.unpack(">I", content[offset : offset + 4])[0]
+        chunk_type = content[offset + 4 : offset + 8]
+        chunk_end = offset + 12 + length
+        if chunk_end > len(content):
+            raise ValueError("dados de chunk PNG truncados")
+        chunk_data = content[offset + 8 : offset + 8 + length]
+        expected_crc = struct.unpack(">I", content[offset + 8 + length : chunk_end])[0]
+        actual_crc = zlib.crc32(chunk_type + chunk_data) & 0xFFFFFFFF
+        if expected_crc != actual_crc:
+            raise ValueError("CRC inválido em chunk PNG")
+        if chunk_index == 0:
+            if chunk_type != b"IHDR" or length != 13:
+                raise ValueError("primeiro chunk PNG deve ser IHDR")
+            dimensions = struct.unpack(">II", chunk_data[:8])
+        if chunk_type == b"IEND":
+            if length != 0 or chunk_end != len(content):
+                raise ValueError("chunk IEND inválido")
+            saw_iend = True
+            break
+        offset = chunk_end
+        chunk_index += 1
+
+    if dimensions is None or not saw_iend:
+        raise ValueError("estrutura PNG incompleta")
+    return dimensions
 
 
 def _probe_video(path: Path) -> dict[str, Any]:
@@ -91,6 +125,7 @@ def validate_package(root: Path) -> dict[str, Any]:
             stream = streams[0] if streams else {}
             width = int(stream.get("width", 0))
             height = int(stream.get("height", 0))
+            frame_rate = Fraction(str(stream.get("r_frame_rate", "0/1")))
             duration = float(metadata.get("format", {}).get("duration", 0))
             if (width, height) != (EXPECTED_WIDTH, EXPECTED_HEIGHT):
                 errors.append(
@@ -101,12 +136,17 @@ def validate_package(root: Path) -> dict[str, Any]:
                     "duração do vídeo deve estar entre 8 e 15 segundos; "
                     f"encontrado {duration:.2f}"
                 )
+            if frame_rate != 30:
+                errors.append(
+                    f"vídeo deve usar 30 fps; encontrado {float(frame_rate):g} fps"
+                )
             checks.append(
                 {
                     "check": "video",
                     "result": "pass"
                     if (width, height) == (EXPECTED_WIDTH, EXPECTED_HEIGHT)
                     and MIN_DURATION <= duration <= MAX_DURATION
+                    and frame_rate == 30
                     else "fail",
                 }
             )

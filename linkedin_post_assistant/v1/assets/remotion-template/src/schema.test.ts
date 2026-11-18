@@ -17,6 +17,21 @@ assert.throws(
   () => parsePostVisualData({...DEFAULT_POST_DATA, durationSeconds: 20}),
   /durationSeconds/,
 );
+assert.throws(
+  () => parsePostVisualData({...DEFAULT_POST_DATA, headline: "x".repeat(91)}),
+  /headline/,
+);
+assert.throws(
+  () => parsePostVisualData({...DEFAULT_POST_DATA, nodes: ["x".repeat(25), "ok"]}),
+  /nodes\[0\]/,
+);
+assert.throws(
+  () => parsePostVisualData({...DEFAULT_POST_DATA, series: "x".repeat(25)}),
+  /series/,
+);
+assert.throws(
+  () => parsePostVisualData({...DEFAULT_POST_DATA, footer: "x".repeat(49)}),
+  /footer/,
+);
 
 console.log("schema tests passed");
-

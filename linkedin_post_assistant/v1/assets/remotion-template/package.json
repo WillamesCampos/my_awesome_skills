@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test:schema": "node --experimental-strip-types src/schema.test.ts",
-    "render:video": "remotion render src/index.ts BlueprintSignalVideo output/post.mp4 --props=public/post-data.json",
-    "render:cover": "remotion still src/index.ts BlueprintSignalCover output/capa.png --props=public/post-data.json"
+    "test:schema": "tsx src/schema.test.ts",
+    "render:video": "remotion render src/index.ts BlueprintSignalVideo ../../output/post.mp4 --props=public/post-data.json",
+    "render:cover": "remotion still src/index.ts BlueprintSignalCover ../../output/capa.png --props=public/post-data.json"
   },
   "dependencies": {
     "@remotion/cli": "4.0.545",
@@ -19,8 +19,7 @@
     "@types/node": "24.10.1",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
+    "tsx": "4.23.15",
     "typescript": "7.0.2"
   }
 }
-
-

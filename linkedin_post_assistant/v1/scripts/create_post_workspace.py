@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import unicodedata
 from datetime import date
@@ -58,7 +59,7 @@ def create_workspace(title: str, root: Path, run_date: date) -> Path:
 
     files = {
         "brief.yaml": (
-            f'title: "{title.replace(chr(34), chr(39))}"\n'
+            f"title: {json.dumps(title, ensure_ascii=False)}\n"
             f'date: "{run_date.isoformat()}"\n'
             'angle: ""\n'
             'case_type: ""\n'

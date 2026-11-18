@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import tempfile
 import unittest
 from datetime import date
@@ -79,6 +80,14 @@ class CreatePostWorkspaceTests(unittest.TestCase):
         third = MODULE.create_workspace("N+1", self.root, date(2026, 11, 18))
 
         self.assertEqual(third.name, "n-1-2026-11-18-2")
+
+    def test_serializes_title_as_safe_yaml_string(self) -> None:
+        title = 'Título "especial"\ninjected: true'
+
+        workspace = MODULE.create_workspace(title, self.root, date(2026, 11, 18))
+        first_line = (workspace / "brief.yaml").read_text(encoding="utf-8").splitlines()[0]
+
+        self.assertEqual(first_line, f"title: {json.dumps(title, ensure_ascii=False)}")
 
 
 if __name__ == "__main__":

@@ -61,4 +61,3 @@ português brasileiro e mantenha o usuário no controle de cada publicação.
 - Não trate frequência desejada como autorização para criar assunto do nada.
 - Não copie frases, identidade, paleta ou assinatura de outro criador.
 - Preserve fontes e intermediários quando a renderização falhar e reporte o erro real.
-

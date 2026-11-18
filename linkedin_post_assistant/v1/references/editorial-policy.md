@@ -48,4 +48,3 @@ primária e guarde o link em `fontes/referencias.md`.
 - Evidência parcial: proponha diário de aprendizagem ou post exploratório.
 - Evidência ausente: pare e peça o material necessário.
 - Risco de confidencialidade: mostre apenas a versão anonimizada antes de continuar.
-
