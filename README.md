@@ -62,6 +62,16 @@ estratégico sobre aplicar ou não.
 
 - Versão atual: `v1`
 
+### `linkedin_post_assistant`
+Transforma aprendizado técnico verificável em um post conciso para LinkedIn,
+com rastreabilidade das afirmações, revisão humana e imagem ou animação no
+sistema visual Blueprint Signal. Usa Remotion como renderizador local padrão e
+não inventa métricas, experiência ou resultados para preencher calendário.
+
+- Versão atual: `v1`
+- Saídas visuais: capa PNG e vídeo MP4 em 1080×1350
+- Aprovação manual: obrigatória antes da redação final e da renderização
+
 ## Instalação
 
 Para instalar uma skill globalmente, copie a pasta da versão desejada para o
@@ -71,6 +81,9 @@ diretório de skills do agente, por exemplo:
 cp -r backend_mentor/v1 ~/.claude/skills/backend-mentor
 cp -r backend_mentor/v1 ~/.opencode/skills/backend-mentor
 cp -r backend_mentor/v1 ~/.codex/skills/backend-mentor
+cp -r linkedin_post_assistant/v1 ~/.claude/skills/linkedin-post-assistant
+cp -r linkedin_post_assistant/v1 ~/.opencode/skills/linkedin-post-assistant
+cp -r linkedin_post_assistant/v1 ~/.codex/skills/linkedin-post-assistant
 ```
 
 Ou, para skills instaladas via [`npx skills`](https://skills.sh) (formato
@@ -79,4 +92,8 @@ universal), copie para `~/.agents/skills/<nome-da-skill>` — o próprio agente
 
 ```bash
 cp -r system_design_generator/v1 ~/.agents/skills/system-design-generator
+cp -r linkedin_post_assistant/v1 ~/.agents/skills/linkedin-post-assistant
 ```
+
+O template visual da `linkedin_post_assistant` requer Node.js 20.19 ou superior,
+além de `ffprobe` para validar o vídeo renderizado.

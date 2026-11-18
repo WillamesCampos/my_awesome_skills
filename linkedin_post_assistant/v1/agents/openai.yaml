@@ -1,0 +1,5 @@
+interface:
+  display_name: "LinkedIn Post Assistant"
+  short_description: "Crie posts técnicos rastreáveis com animação"
+  brand_color: "#1464C8"
+  default_prompt: "Use $linkedin-post-assistant para transformar este aprendizado técnico em um post rastreável com visual Blueprint Signal."
